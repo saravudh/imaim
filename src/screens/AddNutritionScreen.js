@@ -1,161 +1,414 @@
 import React, { useState, useLayoutEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Button } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import {
+    View,
+    Text,
+    TextInput,
+    StyleSheet,
+    Button,
+    ScrollView,
+    TouchableOpacity,
+    Modal,
+    FlatList,
+} from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const AddNutritionScreen = ({ navigation }) => {
-  const [mealName, setMealName] = useState('');
-  const [protein, setProtein] = useState('');
-  const [oil, setOil] = useState('');
-  const [vegetable, setVegetable] = useState('');
-  const [water, setWater] = useState('');
-  const [carbohydrate, setCarbohydrate] = useState('');
-  const [fruit, setFruit] = useState('');
+    const [mealName, setMealName] = useState('');
 
-  const handleSubmit = () => {
-    // Add your logic to save the nutrition data
-    console.log({
-      mealName,
-      protein,
-      oil,
-      vegetable,
-      water,
-      carbohydrate,
-      fruit,
-    });
+    const [protein, setProtein] = useState('');
+    const [proteinQuantity, setProteinQuantity] = useState(0);
 
-    // Navigate back to the summary screen
-    navigation.goBack();
-  };
+    const [vegetable, setVegetable] = useState('');
+    const [vegetableQuantity, setVegetableQuantity] = useState(0);
 
-  useLayoutEffect(() => {
-    // Hide the TabBar when this screen is active
-    navigation.getParent()?.setOptions({
-      tabBarStyle: { display: 'none' },
-    });
+    const [carbohydrate, setCarbohydrate] = useState('');
+    const [carbohydrateQuantity, setCarbohydrateQuantity] = useState(0);
 
-    // Show the TabBar again when navigating back
-    return () =>
-      navigation.getParent()?.setOptions({
-        tabBarStyle: { display: 'flex' },
-      });
-  }, [navigation]);
+    const [fruit, setFruit] = useState('');
+    const [fruitQuantity, setFruitQuantity] = useState(0);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <Button onPress={handleSubmit} title="Add" />
-      ),
-      headerLeft: () => (
-        <Button onPress={() => navigation.goBack()} title="Cancel" />
-      ),
-    });
-  }, [navigation, handleSubmit]);
+    const [date, setDate] = useState(new Date());
+    const [time, setTime] = useState(new Date());
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Meal Name:</Text>
-      <TextInput
-        style={styles.input}
-        value={mealName}
-        onChangeText={setMealName}
-        placeholder="Enter meal name"
-      />
+    const [pickerData, setPickerData] = useState([]);
+    const [currentPicker, setCurrentPicker] = useState('');
+    const [pickerVisible, setPickerVisible] = useState(false);
+    const [datePickerVisible, setDatePickerVisible] = useState(false);
+    const [timePickerVisible, setTimePickerVisible] = useState(false);
 
-      <Text style={styles.label}>Protein (grams):</Text>
-      <Picker
-        selectedValue={protein}
-        onValueChange={(itemValue) => setProtein(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Select Protein" value="" />
-        <Picker.Item label="Chicken" value="Chicken" />
-        <Picker.Item label="Fish" value="Fish" />
-        <Picker.Item label="White Egg" value="White Egg" />
-      </Picker>
+    const handleSubmit = () => {
+        console.log({
+            mealName,
+            protein,
+            proteinQuantity,
+            vegetable,
+            vegetableQuantity,
+            carbohydrate,
+            carbohydrateQuantity,
+            fruit,
+            fruitQuantity,
+        });
 
-      <Text style={styles.label}>Oil (teaspoons):</Text>
-      <TextInput
-        style={styles.input}
-        value={oil}
-        onChangeText={setOil}
-        placeholder="Enter oil in teaspoons"
-        keyboardType="numeric"
-      />
+        navigation.goBack();
+    };
 
-      <Text style={styles.label}>Vegetables (grams):</Text>
-      <Picker
-        selectedValue={vegetable}
-        onValueChange={(itemValue) => setVegetable(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Select Vegetable" value="" />
-        <Picker.Item label="บวม" value="บวม" />
-        <Picker.Item label="มะระ" value="มะระ" />
-        <Picker.Item label="ขิง" value="ขิง" />
-        <Picker.Item label="เห็ดหูหนู" value="เห็ดหูหนู" />
-        <Picker.Item label="พริกหนุ่ม" value="พริกหนุ่ม" />
-        <Picker.Item label="แตงกวา" value="แตงกวา" />
-      </Picker>
+    useLayoutEffect(() => {
+        navigation.getParent()?.setOptions({
+            tabBarStyle: { display: 'none' },
+        });
 
-      <Text style={styles.label}>Water (cc):</Text>
-      <TextInput
-        style={styles.input}
-        value={water}
-        onChangeText={setWater}
-        placeholder="Enter water in cc"
-        keyboardType="numeric"
-      />
+        return () =>
+            navigation.getParent()?.setOptions({
+                tabBarStyle: { display: 'flex' },
+            });
+    }, [navigation]);
 
-      <Text style={styles.label}>Carbohydrate (grams):</Text>
-      <Picker
-        selectedValue={carbohydrate}
-        onValueChange={(itemValue) => setCarbohydrate(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Select Carbohydrate" value="" />
-        <Picker.Item label="ข้าวสวย" value="ข้าวสวย" />
-        <Picker.Item label="หมี่ขาว" value="หมี่ขาว" />
-        <Picker.Item label="เส้นบุก" value="เส้นบุก" />
-      </Picker>
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => <Button onPress={handleSubmit} title="Add" />,
+            headerLeft: () => <Button onPress={() => navigation.goBack()} title="Cancel" />,
+        });
+    }, [navigation, handleSubmit]);
 
-      <Text style={styles.label}>ผลไม้ (grams):</Text>
-      <Picker
-        selectedValue={fruit}
-        onValueChange={(itemValue) => setFruit(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Select Fruit" value="" />
-        <Picker.Item label="สับปะรด" value="สับปะรด" />
-        <Picker.Item label="สาลี่" value="สาลี่" />
-        <Picker.Item label="ส้มโอ" value="ส้มโอ" />
-      </Picker>
-    </View>
-  );
+    const openPicker = (data, field) => {
+        setPickerData(data);
+        setCurrentPicker(field);
+        setPickerVisible(true);
+    };
+
+    const closePicker = () => {
+        setPickerVisible(false);
+    };
+
+    const openDatePicker = () => setDatePickerVisible(true);
+    const closeDatePicker = () => setDatePickerVisible(false);
+
+    const openTimePicker = () => setTimePickerVisible(true);
+    const closeTimePicker = () => setTimePickerVisible(false);
+
+
+    const handleItemSelect = (item) => {
+        if (currentPicker === 'protein') setProtein(item);
+        if (currentPicker === 'vegetable') setVegetable(item);
+        if (currentPicker === 'carbohydrate') setCarbohydrate(item);
+        if (currentPicker === 'fruit') setFruit(item);
+
+        closePicker();
+    };
+
+    const InputWithPickerAndNumber = ({
+        label,
+        pickerOptions,
+        selectedValue,
+        setSelectedValue,
+        quantity,
+        setQuantity,
+        fieldName,
+    }) => {
+        const increment = () => setQuantity(quantity + 1);
+        const decrement = () => {
+            if (quantity > 0) setQuantity(quantity - 1);
+        };
+
+        return (
+            <View>
+                <Text style={styles.label}>{label}</Text>
+                <View style={styles.inputRow}>
+                    <TouchableOpacity
+                        onPress={() => openPicker(pickerOptions, fieldName)}
+                        style={styles.pickerButton}
+                    >
+                        <Text style={styles.pickerText}>{selectedValue || `Select ${label}`}</Text>
+                    </TouchableOpacity>
+                    <View style={styles.numberInputContainer}>
+                        <TouchableOpacity onPress={decrement} style={styles.button}>
+                            <Text style={styles.buttonText}>-</Text>
+                        </TouchableOpacity>
+                        <TextInput
+                            style={styles.numberInput}
+                            value={String(quantity)}
+                            onChangeText={(text) => setQuantity(Number(text))}
+                            keyboardType="numeric"
+                        />
+                        <TouchableOpacity onPress={increment} style={styles.button}>
+                            <Text style={styles.buttonText}>+</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        );
+    };
+
+    return (
+        <ScrollView contentContainerStyle={styles.container}>
+            <Text style={styles.label}>Meal Name:</Text>
+            <TextInput
+                style={styles.input}
+                value={mealName}
+                onChangeText={setMealName}
+                placeholder="Enter meal name"
+            />
+
+            {/* Date Picker */}
+            <Text style={styles.label}>Date:</Text>
+            <TouchableOpacity onPress={openDatePicker} style={styles.pickerButton}>
+                <Text style={styles.pickerText}>{date.toLocaleDateString()}</Text>
+            </TouchableOpacity>
+
+            {/* Time Picker */}
+            <Text style={styles.label}>Time:</Text>
+            <TouchableOpacity onPress={openTimePicker} style={styles.pickerButton}>
+                <Text style={styles.pickerText}>{time.toLocaleTimeString()}</Text>
+            </TouchableOpacity>
+
+
+            <InputWithPickerAndNumber
+                label="Protein (grams)"
+                pickerOptions={['Chicken', 'Fish', 'White Egg']}
+                selectedValue={protein}
+                setSelectedValue={setProtein}
+                quantity={proteinQuantity}
+                setQuantity={setProteinQuantity}
+                fieldName="protein"
+            />
+
+            <InputWithPickerAndNumber
+                label="Vegetables (grams)"
+                pickerOptions={['บวม', 'มะระ', 'ขิง', 'เห็ดหูหนู', 'พริกหนุ่ม', 'แตงกวา']}
+                selectedValue={vegetable}
+                setSelectedValue={setVegetable}
+                quantity={vegetableQuantity}
+                setQuantity={setVegetableQuantity}
+                fieldName="vegetable"
+            />
+
+            <InputWithPickerAndNumber
+                label="Carbohydrate (grams)"
+                pickerOptions={['ข้าวสวย', 'หมี่ขาว', 'เส้นบุก']}
+                selectedValue={carbohydrate}
+                setSelectedValue={setCarbohydrate}
+                quantity={carbohydrateQuantity}
+                setQuantity={setCarbohydrateQuantity}
+                fieldName="carbohydrate"
+            />
+
+            <InputWithPickerAndNumber
+                label="ผลไม้ (grams)"
+                pickerOptions={['สับปะรด', 'สาลี่', 'ส้มโอ']}
+                selectedValue={fruit}
+                setSelectedValue={setFruit}
+                quantity={fruitQuantity}
+                setQuantity={setFruitQuantity}
+                fieldName="fruit"
+            />
+
+            {/* Date Picker Modal */}
+            <Modal visible={datePickerVisible} transparent={true} animationType="slide">
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        {/* Modal Header */}
+                        <View style={styles.modalHeader}>
+                            <TouchableOpacity onPress={closeDatePicker} style={styles.cancelButton}>
+                                <Text style={styles.cancelButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.modalTitle}>Select Date</Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    closeDatePicker();
+                                }}
+                                style={styles.setButton}
+                            >
+                                <Text style={styles.setButtonText}>Set</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Date Picker Component */}
+                        <DateTimePicker
+                            value={date}
+                            mode="date"
+                            display="spinner"
+                            onChange={(event, selectedDate) => {
+                                if (selectedDate) setDate(selectedDate);
+                            }}
+                        />
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Time Picker Modal */}
+            <Modal visible={timePickerVisible} transparent={true} animationType="slide">
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        {/* Modal Header */}
+                        <View style={styles.modalHeader}>
+                            <TouchableOpacity onPress={closeTimePicker} style={styles.cancelButton}>
+                                <Text style={styles.cancelButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.modalTitle}>Select Time</Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    closeTimePicker();
+                                }}
+                                style={styles.setButton}
+                            >
+                                <Text style={styles.setButtonText}>Set</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Time Picker Component */}
+                        <DateTimePicker
+                            value={time}
+                            mode="time"
+                            display="spinner"
+                            onChange={(event, selectedTime) => {
+                                if (selectedTime) setTime(selectedTime);
+                            }}
+                        />
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Picker Modal */}
+            <Modal visible={pickerVisible} transparent={true} animationType="slide">
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        {/* Modal Header with Title and Close Button */}
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Select an Option</Text>
+                            <TouchableOpacity onPress={closePicker} style={styles.closeButton}>
+                                <Text style={styles.closeButtonText}>✕</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <FlatList
+                            data={pickerData}
+                            keyExtractor={(item) => item}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    style={styles.modalItem}
+                                    onPress={() => handleItemSelect(item)}
+                                >
+                                    <Text style={styles.modalItemText}>{item}</Text>
+                                </TouchableOpacity>
+                            )}
+                        />
+                    </View>
+                </View>
+            </Modal>
+        </ScrollView>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-    fontWeight: 'bold',
-  },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    marginBottom: 16,
-    paddingHorizontal: 8,
-    borderRadius: 4,
-  },
-  picker: {
-    height: 40,
-    marginBottom: 16,
-  },
+    container: {
+        padding: 16,
+        backgroundColor: '#fff',
+    },
+    label: {
+        fontSize: 16,
+        marginBottom: 8,
+        fontWeight: 'bold',
+    },
+    input: {
+        height: 40,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        marginBottom: 16,
+        paddingHorizontal: 8,
+        borderRadius: 4,
+    },
+    inputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    pickerButton: {
+        flex: 1,
+        padding: 12,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 4,
+        justifyContent: 'center',
+    },
+    pickerText: {
+        fontSize: 16,
+        color: '#555',
+    },
+    numberInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginLeft: 8,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 4,
+    },
+    numberInput: {
+        width: 50,
+        textAlign: 'center',
+        fontSize: 16,
+        paddingVertical: 8,
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+        borderColor: '#ccc',
+    },
+    button: {
+        padding: 10,
+    },
+    buttonText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        padding: 16,
+        borderTopLeftRadius: 12,
+        borderTopRightRadius: 12,
+        height: '50%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderBottomWidth: 1,
+        borderColor: '#ccc',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+        flex: 1,
+        textAlign: 'center',
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        backgroundColor: '#eee',
+        borderRadius: 15,
+        width: 30,
+        height: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    closeButtonText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    modalItem: {
+        padding: 16,
+        borderBottomWidth: 1,
+        borderColor: '#ccc',
+    },
+    modalItemText: {
+        fontSize: 16,
+    },
 });
 
 export default AddNutritionScreen;
