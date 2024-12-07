@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import React, { useState, useLayoutEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, Button } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 const AddNutritionScreen = ({ navigation }) => {
@@ -26,6 +26,30 @@ const AddNutritionScreen = ({ navigation }) => {
     // Navigate back to the summary screen
     navigation.goBack();
   };
+
+  useLayoutEffect(() => {
+    // Hide the TabBar when this screen is active
+    navigation.getParent()?.setOptions({
+      tabBarStyle: { display: 'none' },
+    });
+
+    // Show the TabBar again when navigating back
+    return () =>
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'flex' },
+      });
+  }, [navigation]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Button onPress={handleSubmit} title="Add" />
+      ),
+      headerLeft: () => (
+        <Button onPress={() => navigation.goBack()} title="Cancel" />
+      ),
+    });
+  }, [navigation, handleSubmit]);
 
   return (
     <View style={styles.container}>
@@ -105,8 +129,6 @@ const AddNutritionScreen = ({ navigation }) => {
         <Picker.Item label="สาลี่" value="สาลี่" />
         <Picker.Item label="ส้มโอ" value="ส้มโอ" />
       </Picker>
-
-      <Button title="Save" onPress={handleSubmit} />
     </View>
   );
 };

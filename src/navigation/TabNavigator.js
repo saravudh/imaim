@@ -25,7 +25,13 @@ const SummaryStack = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Summary" component={SummaryScreen} />
-      <Stack.Screen name="AddNutrition" component={AddNutritionScreen} />
+      <Stack.Screen name="AddNutrition" component={AddNutritionScreen}
+        options={{
+          presentation: 'modal', // This makes it appear as a sheet (iOS style)
+          headerShown: true, // Show a header for the modal if needed
+          title: 'Add Nutrition', // Set the modal's title
+        }}
+      />
     </Stack.Navigator>
   );
 };
