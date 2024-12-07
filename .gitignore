@@ -1,5 +1,7 @@
 # OSX
 #
+
+service-account-key.json
 .DS_Store
 
 # Xcode
