@@ -24,7 +24,7 @@ const TabNavigator = () => {
 const SummaryStack = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Summary" component={SummaryScreen} />
+      <Stack.Screen name="SummaryHome" component={SummaryScreen} />
       <Stack.Screen name="AddNutrition" component={AddNutritionScreen}
         options={{
           presentation: 'modal', // This makes it appear as a sheet (iOS style)
