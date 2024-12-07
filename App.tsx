@@ -123,6 +123,27 @@ import { NavigationContainer } from '@react-navigation/native';
 import TabNavigator from './src/navigation/TabNavigator';
 import store from './src/redux/store';
 
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
+GoogleSignin.configure({
+  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  iosClientId: '996010761350-dvghkmo3f39t3tpnuggui6s8f3j4q4cu.apps.googleusercontent.com',
+});
+
+const signIn = async () => {
+  try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const token = (await GoogleSignin.getTokens()).accessToken;
+      console.log("xxxxAccess Token:", token);
+
+      return token;
+  } catch (error) {
+      console.error("xxxError signing in:", error);
+      throw error;
+  }
+};
+
 const App = () => {
   return (
     <Provider store={store}>

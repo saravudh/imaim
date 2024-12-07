@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useEffect } from 'react';
 import {
     View,
     Text,
@@ -10,7 +10,10 @@ import {
     Modal,
     FlatList,
 } from 'react-native';
+import { google } from "googleapis";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import axios from 'axios';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const AddNutritionScreen = ({ navigation }) => {
     const [mealName, setMealName] = useState('');
@@ -36,21 +39,133 @@ const AddNutritionScreen = ({ navigation }) => {
     const [datePickerVisible, setDatePickerVisible] = useState(false);
     const [timePickerVisible, setTimePickerVisible] = useState(false);
 
-    const handleSubmit = () => {
-        console.log({
-            mealName,
-            protein,
-            proteinQuantity,
-            vegetable,
-            vegetableQuantity,
-            carbohydrate,
-            carbohydrateQuantity,
-            fruit,
-            fruitQuantity,
-        });
+    const [isFormValid, setIsFormValid] = useState(false);
 
-        navigation.goBack();
-    };
+    const RANGE = 'Sheet1!A1:A1"';
+
+
+    const [newData, setNewData] = useState('');
+    const [sheet, setSheet] = useState(null);
+
+    const handleSubmit = async () => {
+        try {
+          // Sign in with Google and get the access token
+          const userInfo = await GoogleSignin.signIn();
+          const accessToken = (await GoogleSignin.getTokens()).accessToken;
+      
+          console.log('User Info:', userInfo);
+          console.log('Access Token:', accessToken);
+      
+          // Proceed with the API call to Google Sheets
+          const spreadsheetId = '10nUkjRDrRWDn1hc4_mNMNNAyh54xc62KwZ2B8c_I2_c'; // Replace with your actual Google Sheets ID
+          const range = 'Sheet1!A1:D1'; // Replace with your desired range
+          const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}:append?valueInputOption=RAW`;
+      
+          const data = {
+            values: [
+              [
+                'Meal Name',
+                'Protein',
+                'Vegetables',
+                'Carbohydrates',
+                'Fruits',
+              ], // Replace with your actual data
+            ],
+          };
+      
+          const response = await axios.post(url, data, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          });
+      
+          if (response.status === 200) {
+            console.log('Data successfully added to Google Sheets');
+            alert('Data added successfully!');
+          } else {
+            console.error('Error adding data:', response.data);
+            alert('Failed to add data to Google Sheets.');
+          }
+        } catch (error) {
+          console.error('Error during submission:', error);
+          alert('An error occurred while submitting data.');
+        }
+      };
+
+    // const handleSubmit = async () => {
+    //     const accessToken = await signIn();
+    //     const data = [
+    //         mealName,
+    //         protein,
+    //         proteinQuantity,
+    //         vegetable,
+    //         vegetableQuantity,
+    //         carbohydrate,
+    //         carbohydrateQuantity,
+    //         fruit,
+    //         fruitQuantity,
+    //         date.toISOString().split('T')[0], // Format date as YYYY-MM-DD
+    //         time.toLocaleTimeString(),
+    //     ];
+
+    //     console.log(`aa: https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}:append?valueInputOption=RAW&key=${API_KEY}`)
+    //     try {
+    //         const response = await axios.post(
+    //             `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}:append?valueInputOption=RAW&key=${API_KEY}`,
+    //             {
+    //                 range: RANGE,
+    //                 majorDimension: 'ROWS',
+    //                 values: [data],
+    //             }
+    //         );
+
+    //         if (response.status === 200) {
+    //             alert('Data successfully added to Google Sheets');
+    //             navigation.goBack();
+    //         } else {
+    //             console.error('Error adding data to Google Sheets:', response);
+    //             alert('Failed to add data. Please try again.');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error:', error);
+    //         alert('An error occurred while saving data.');
+    //     }
+    // };
+
+    // const handleSubmit = () => {
+    //     console.log({
+    //         mealName,
+    //         protein,
+    //         proteinQuantity,
+    //         vegetable,
+    //         vegetableQuantity,
+    //         carbohydrate,
+    //         carbohydrateQuantity,
+    //         fruit,
+    //         fruitQuantity,
+    //     });
+
+    //     navigation.goBack();
+    // };
+
+    useEffect(() => {
+        const isValid =
+            mealName &&
+            protein &&
+            proteinQuantity > 0 &&
+            vegetable &&
+            vegetableQuantity > 0 &&
+            carbohydrate &&
+            carbohydrateQuantity > 0 &&
+            fruit &&
+            fruitQuantity > 0 &&
+            date &&
+            time;
+
+        setIsFormValid(isValid);
+    }, [mealName, protein, proteinQuantity, vegetable, vegetableQuantity, carbohydrate, carbohydrateQuantity, fruit, fruitQuantity, date, time]);
+
 
     useLayoutEffect(() => {
         navigation.getParent()?.setOptions({
@@ -65,7 +180,7 @@ const AddNutritionScreen = ({ navigation }) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerRight: () => <Button onPress={handleSubmit} title="Add" />,
+            headerRight: () => <Button onPress={handleSubmit} title="Add" disabled={!isFormValid} />,
             headerLeft: () => <Button onPress={() => navigation.goBack()} title="Cancel" />,
         });
     }, [navigation, handleSubmit]);
